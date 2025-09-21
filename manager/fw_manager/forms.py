@@ -1,6 +1,8 @@
+from datetime import datetime
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired
 from wtforms.fields.simple import StringField, FileField, SubmitField, TextAreaField
+from wtforms.fields.datetime import DateTimeLocalField
 from wtforms.validators import InputRequired, Length
 
 ALLOWED_IMAGE_TYPES = ["jpeg", "gif", "png"]
@@ -19,8 +21,8 @@ class UploadImageForm(FlaskForm):
         validators=[InputRequired(), Length(1, 100)],
     )
     position = StringField("Position")
-    description = StringField("Description")
-    time = StringField("Time")
+    description = TextAreaField("Description", render_kw={"rows": 3})
+    time = DateTimeLocalField("Time", default=datetime.now)
 
 
 class EditImageForm(FlaskForm):
@@ -29,8 +31,8 @@ class EditImageForm(FlaskForm):
         validators=[InputRequired(), Length(1, 100)],
     )
     position = StringField("Position")
-    description = StringField("Description")
-    time = StringField("Time")
+    description = TextAreaField("Description", render_kw={"rows": 3})
+    time = DateTimeLocalField("Time", default=datetime.now)
 
 
 class SettingsForm(FlaskForm):
