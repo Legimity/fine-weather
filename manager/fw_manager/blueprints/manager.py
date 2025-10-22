@@ -113,6 +113,7 @@ def add_image():
     img_name = f"{uuid4().hex}_{img_file.filename}"
     img_uri = img_folder / img_name
     pil_img = PImage.open(img_file)
+    position = form_data.get("position", "").strip()
 
     logger.info("Generating thumbnail...")
     thumbnail_uri = thumbnail_folder / img_name
@@ -137,7 +138,7 @@ def add_image():
         uri=img_uri.relative_to(current_app.root_path).as_posix(),
         thumbnail_uri=thumbnail_uri.relative_to(current_app.root_path).as_posix(),
         title=form_data["title"],
-        position=form_data["position"],
+        position=position,
         time=form_data["time"],
         description=form_data["description"],
         blurhash=img_hash,

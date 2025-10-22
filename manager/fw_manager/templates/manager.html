@@ -170,6 +170,56 @@
 
 {% block scripts %}
 {{ super() }}
+<script type="module">
+    import * as exifr from "https://cdn.jsdelivr.net/npm/exifr/+esm";
+
+    const GEOAPIFY_API_KEY = "{{ geoapify_api_key }}";
+    const imageInput = document.querySelector("#image");
+    const positionInput = document.querySelector("#position");
+
+    async function reverseGeocode(lat, lon) {
+        const url = new URL("https://api.geoapify.com/v1/geocode/reverse");
+        url.searchParams.set("lat", lat);
+        url.searchParams.set("lon", lon);
+        url.searchParams.set("apiKey", GEOAPIFY_API_KEY);
+        url.searchParams.set("lang", "zh");
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+            throw new Error(`Geoapify request failed: ${response.status}`);
+        }
+        const payload = await response.json();
+        return payload.features?.[0]?.properties?.formatted ?? "";
+    }
+
+    async function handleImageChange(event) {
+        if (!GEOAPIFY_API_KEY) {
+            console.warn("Geoapify API key is not configured.");
+            return;
+        }
+        const file = event.target?.files?.[0];
+        if (!file) {
+            return;
+        }
+        try {
+            const gps = await exifr.gps(file);
+            if (!gps?.latitude || !gps?.longitude) {
+                console.info("No GPS data found in EXIF.");
+                return;
+            }
+            const location = await reverseGeocode(gps.latitude, gps.longitude);
+            if (location && positionInput) {
+                positionInput.value = location;
+                positionInput.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+        } catch (error) {
+            console.error("Failed to prefill location from EXIF:", error);
+        }
+    }
+
+    if (imageInput && positionInput) {
+        imageInput.addEventListener("change", handleImageChange);
+    }
+</script>
 <script>
     const NETWORK_ERR_MSG = "Network error occurred.";
     let addImageModal;
