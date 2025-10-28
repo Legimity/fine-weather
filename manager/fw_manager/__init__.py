@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -13,6 +14,7 @@ from .models import db
 def create_app():
     app = Flask(__name__, instance_path=Path("./instance").absolute())
     app.config.from_prefixed_env()
+    app.config["GEOAPIFY_API_KEY"] = os.environ.get("GEOAPIFY_API_KEY", "")
 
     Bootstrap5(app)
     CSRFProtect(app)
@@ -25,6 +27,7 @@ def create_app():
     def make_template_context():
         return dict(
             year=datetime.now().year,
+            geoapify_api_key=app.config.get("GEOAPIFY_API_KEY", ""),
         )
 
     return app
